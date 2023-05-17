@@ -1,0 +1,4 @@
+user: 'myusername@tenant_name'
+password: 'xxxxxxxxxxxx'
+wsdl_url: 'https://server_name/ccx/service/tenant_name/Student_Records/v40.1?wsdl'
+binding_path: '{urn:com.workday/bsvc/Student_Records}Student_RecordsBinding'
