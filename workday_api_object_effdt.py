@@ -4,10 +4,15 @@ import pandas as pd
 
 class WorkdayAPIObjectEffdt(WorkdayAPIObject):
 
+    def __init__(self, obj_name, config_file, effdt_col_name='effective_date'):
+        super().__init__(obj_name, config_file)
+
     def api_call_with_effdt_history(self, min_effdt, max_to_date):
         df = self.api_call({}, {})
         df['to_date'] = max_to_date
+
         new_data = []
+
         for i, row in df[df['effective_date'] > min_effdt].iterrows():
             prev_date = row['effective_date'] - timedelta(1)
             while prev_date >= min_effdt:
