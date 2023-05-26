@@ -5,7 +5,7 @@ import json
 from json_utils import WorkdayJSONEncoder
 import pandas as pd
 
-#class Worker(WorkdayAPIObjectEffdt):
+
 class Worker(WorkdayAPIObject):
 
     def __init__(self, config_file):
@@ -21,9 +21,9 @@ class Worker(WorkdayAPIObject):
                                                      'Include_Organizations': False,
                                                      'Include_Roles': False,
                                                      'Include_Transaction_Log_Data': False,
-                                                     'Include_Employee_Contract_Data': True}})
+                                                     'Include_Employee_Contract_Data': False}})
         r.to_csv('workers.csv', index=False)
-        # r = pd.read_csv('workers.csv', low_memory=False)
+
         return(r)
 
     def get_workers_by_date(self, empl_ids, cw_ids, eff_date):
@@ -41,6 +41,6 @@ class Worker(WorkdayAPIObject):
                                            'Include_Organizations': False,
                                            'Include_Roles': False,
                                            'Include_Transaction_Log_Data': False,
-                                           'Include_Employee_Contract_Data': True}}
+                                           'Include_Employee_Contract_Data': False}}
         resp_filters = {'As_Of_Effective_Date': eff_date.strftime('%Y-%m-%d')}
         return self.api_call(resp_filters, other_params)

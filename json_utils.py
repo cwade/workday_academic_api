@@ -15,15 +15,14 @@ class WorkdayJSONEncoder(json.JSONEncoder):
         return super(WorkdayJSONEncoder, self).default(obj)
 
 
-def flatten_json(nested_json, exclude=['']):
+def flatten_json(nested_json):
     out = {}
 
-    def flatten(x, name='', excl=exclude):
-        if type(x) is dict:
+    def flatten(x, name=''):
+        if type(x) == dict:
             for a in x:
-                if a not in excl:
-                    flatten(x[a], name + a + '_')
-        elif type(x) is list:
+                flatten(x[a], name + a + '_')
+        elif type(x) == list:
             i = 0
             for a in x:
                 flatten(a, name + str(i) + '_')

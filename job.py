@@ -175,7 +175,7 @@ class Job:
         # We want to do an additional job row fetch for the day before each job move
         # - maybe for each termination too
         # These are rows resulting another position ending, so need different handling
-        moves = h[h['process'].isin(['Promotion', 'Promote In', 'Lateral Move'])].copy(deep=True)
+        moves = h[h['process'].isin(['Promotion', 'Promote In', 'Lateral Move', 'Transfer'])].copy(deep=True)
         moves['effective_date'] = moves['effective_date'] - timedelta(days=1)
         moves['process'] = moves['process'] + ' day before'
 
@@ -251,10 +251,7 @@ class Job:
         jbs['valid_to'] = jbs['valid_to'].astype('datetime64[ns]').dt.date
 
         # For every termination row, fill in the termination date and fix the valid to date
-        print(jbs['valid_to'].dtype, terminations['effective_date'].dtype)
         for i, term_row in terminations.iterrows():
-            print(term_row['effective_date'])
-            print(type(term_row['effective_date']))
             jbs.loc[(jbs['id']==term_row['id']) &
                     (jbs['id_type']==term_row['id_type']) &
                     (jbs['position_id']==term_row['position_id']) &
