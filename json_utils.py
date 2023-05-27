@@ -32,3 +32,25 @@ def flatten_json(nested_json):
 
     flatten(nested_json)
     return out
+
+def get_key_value_for_types(list_of_dicts, types, key):
+    if type(list_of_dicts) != list:
+        print("Warning: was looking for {} in {}".format(types, list_of_dicts))
+        return(list_of_dicts)
+    values = [x[key] for x in list_of_dicts if x['type'] in types]
+    if len(values) == 1:
+        return(values[0])
+    elif len(values) == 0:
+        print("Warning: didn't find {} in {}".format(types, list_of_dicts))
+        return
+    else:
+        raise Exception('got unexpected values {}'.format(values))
+
+def extract_sup_orgs(data):
+    if type(data) != list:
+        return data
+    else:
+        orgs = [get_key_value_for_types(
+            x['Organization_Reference']['ID'], 'Organization_Reference_ID', '_value_1')[12:].replace(
+            '_', ' ') for x in data]
+        return ' > '.join(orgs)
