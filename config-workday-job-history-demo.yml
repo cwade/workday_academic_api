@@ -1,0 +1,4 @@
+# For example https://sharedamupreview.workdaysuv.com/ccx/service/systemreport2/amu/Job_History
+report_url: 'https://server_name/ccx/service/systemreport2/tenant_name/Job_History'
+username: 'jjones'
+password: 'abcdefghijkl'

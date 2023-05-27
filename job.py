@@ -117,8 +117,8 @@ class Job:
                 process = job_history.xpath('./wd:Process/@wd:Descriptor',
                                             namespaces={'wd': 'urn:com.workday.report/Job_History'})[0]
                 process = process[:process.find(':')]
-                effdt = job_history.xpath('./wd:Effective_Date/text()',
-                                          namespaces={'wd': 'urn:com.workday.report/Job_History'})[0]
+                effdt = str(job_history.xpath('./wd:Effective_Date/text()',
+                                              namespaces={'wd': 'urn:com.workday.report/Job_History'})[0])
                 if id_type == 'Employee_ID':
                     data.append((name, worker_id, np.nan, pos_id, pos_descr, effdt, process))
 
@@ -206,6 +206,7 @@ class Job:
 
         # Apply the function to each group
         jbs = jbs.groupby(['worker_id', 'position_id']).apply(transform_group)
+        jbs = jbs.reset_index(drop=True)
         jbs.loc[jbs['termination_date'].notnull(), 'valid_to'] = jbs['termination_date']
         jbs['valid_to'] = jbs['valid_to'].astype('datetime64[ns]').dt.date
 

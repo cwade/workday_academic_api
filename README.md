@@ -1,27 +1,21 @@
 ## Workday Academic API
 This is very rough, minimally documented code using Python and zeep to extract some of the Workday academic data (Workday Student + some of the academic aspects of Workday HR) into pandas dataframes.
 
+From a terminal
 ```
-# Sample usage
-from academic_unit import AcademicUnit
-from student_course import StudentCourse
-from course_section import CourseSection
-from datetime import datetime
-
-config_hr = 'config-workday-hr-demo.yml'
-config_stu = 'config-workday-stu-demo.yml'
-
-min_effdt = datetime(1900, 1, 1)
-max_to_date = datetime(2223, 1, 1)
-
-u = AcademicUnit(config_hr)
-units = u.get_all(min_effdt, max_to_date)
-
-c = StudentCourse(config_stu)
-courses = c.get_all(min_effdt, max_to_date)
-
-cs = CourseSection(config_stu)
-course_sects = cs.get_all()
+python -m venv wkdy_api
+source wkdy_api/bin/activate
+git clone git@github.com:cwade/workday_academic_api.git
+cd workday_academic_api
+pip install -r requirements.txt
 ```
 
-The methods above extract all the academic units, courses, and course sections into pandas dataframes. At the moment, these data frames include many typical columns but also some unparsed JSON.
+Edit the files config-workday-hr-demo.yml, config-workday-stu-demo.yml, and config-workday-job-history-demo.yml with the correct server_name, tenant_name, and user credentials. The users you choose need to have permissions to make API calls.
+
+Once that's done, from the terminal (with the venv activated) you can run
+
+```
+python example.py
+```
+
+This should output a csv file for every type of data the script is pulling. Most of these are still very rough. The job_history.csv file is the most developed but I still need to test more to see if what's coming out is correct. 

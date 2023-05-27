@@ -1,4 +1,7 @@
+# for example jjones@amu - though this won't actually work on a shared demo tenant
+# unless you have the user's password
 user: 'myusername@tenant_name'
 password: 'xxxxxxxxxxxx'
+# for example https://sharedamupreview.workdaysuv.com/ccx/service/amu/Human_Resources/v40.1?wsdl
 wsdl_url: 'https://server_name/ccx/service/tenant_name/Human_Resources/v40.1?wsdl'
 binding_path: '{urn:com.workday/bsvc/Human_Resources}Human_ResourcesBinding'
