@@ -43,13 +43,19 @@ cs = CourseSection(config_stu)
 sections = cs.get_all()
 sections.to_csv('course_sections.csv', index=False)
 
-# Gets a dataframe of all academic appointees. Still needs a bunch of
-# cleanup to make the output usable. Ideally there will eventually
-# be a way to get all the appointments out, similar to get_job_history.
+# Gets a dataframe of all academic appointees. Not all that informative on its own
+# but used for getting academic appointments.
 print('Getting academic appointees')
 a = AcademicAppointee(config_hr)
 appointees = a.get_all()
 appointees.to_csv('academic_appointees.csv', index=False)
+
+# Gets a dataframe of all academic appointments. I don't yet know whether this
+# retrieves a person's entire history of appointments or just the current ones.
+print('Getting academic appointments')
+aa = AcademicAppointment(config_hr)
+appointments = aa.get_all()
+appointments.to_csv('academic_appointments.csv', index=False)
 
 # Gets a dataframe of all job data, including changes over time. The output
 # is pretty clean now, but it needs more testing to verify the data is correct.

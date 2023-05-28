@@ -43,33 +43,35 @@ class Job:
                       'scheduled_weekly_hours', 'default_weekly_hours', 'full_time_equivalent_percentage',
                       'specify_paid_fte', 'paid_fte', 'specify_working_fte', 'working_fte', 'exclude_from_headcount',
                       'job_profile_id', 'job_profile_name', 'manager_id', 'organization']
+        # TODO change this to return nothing, rather than empty df
         if len(job_list) == 0:
             return pd.DataFrame(columns=final_cols)
 
         jobs = pd.json_normalize(job_list)
+        jobs.columns = [x.replace('Position_Data.', '') for x in jobs.columns]
 
         jobs['organization'] = \
             jobs['Position_Management_Chains_Data.Position_Supervisory_Management_Chain_Data.Management_Chain_Data']. \
             apply(extract_sup_orgs)
-        jobs['worker_type'] = jobs['Position_Data.Worker_Type_Reference.ID'].apply(
-            lambda x: get_key_value_for_types(x, ['Employee_Type_ID', 'Contingent_Worker_Type_ID'], '_value_1'))
-        jobs['time_type'] = jobs['Position_Data.Position_Time_Type_Reference.ID'].apply(
-            lambda x: get_key_value_for_types(x, ['Position_Time_Type_ID'], '_value_1'))
-        jobs['pay_rate_type'] = jobs['Position_Data.Pay_Rate_Type_Reference.ID'].apply(
-            lambda x: get_key_value_for_types(x, ['Pay_Rate_Type_ID'], '_value_1') if type(x) == list else x)
-        jobs['job_profile_id'] = jobs['Position_Data.Job_Profile_Summary_Data.Job_Profile_Reference.ID'].apply(
-            lambda x: get_key_value_for_types(x, ['Job_Profile_ID'], '_value_1'))
-        jobs['manager_id'] = jobs['Position_Data.Manager_as_of_last_detected_manager_change_Reference'].apply(
+        jobs['manager_id'] = jobs['Manager_as_of_last_detected_manager_change_Reference'].apply(
             lambda x: get_key_value_for_types(x[0]['ID'], ['Employee_ID', 'Contingent_Worker_ID'], '_value_1')
             if len(x) > 0 else np.nan)
 
-        jobs.columns = [x.replace('Position_Data.', '').lower() for x in jobs.columns]
+        vals_to_extract = [
+            ['worker_type', 'Worker_Type_Reference.ID', ['Employee_Type_ID', 'Contingent_Worker_Type_ID']],
+            ['time_type', 'Position_Time_Type_Reference.ID', ['Position_Time_Type_ID']],
+            ['pay_rate_type', 'Pay_Rate_Type_Reference.ID', ['Pay_Rate_Type_ID']],
+            ['job_profile_id', 'Job_Profile_Summary_Data.Job_Profile_Reference.ID', ['Job_Profile_ID']]]
+
+        for new_var, old_var, elems in vals_to_extract:
+            jobs[new_var] = jobs[old_var].apply(lambda x: get_key_value_for_types(x, elems))
+
+        jobs.columns = [x.lower() for x in jobs.columns]
 
         jobs = jobs.rename(columns={
             'job_profile_summary_data.job_profile_name': 'job_profile_name',
             'start_date': 'position_start_date',
-            'end_date': 'position_end_date'
-        })
+            'end_date': 'position_end_date'})
 
         jobs = jobs[final_cols]
         workers = workers.drop(columns=['job_data'])

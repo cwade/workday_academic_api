@@ -1,6 +1,7 @@
 import json
 import decimal
 import datetime
+import pandas as pd
 
 
 class WorkdayJSONEncoder(json.JSONEncoder):
@@ -33,7 +34,9 @@ def flatten_json(nested_json):
     flatten(nested_json)
     return out
 
-def get_key_value_for_types(list_of_dicts, types, key):
+def get_key_value_for_types(list_of_dicts, types, key='_value_1'):
+    if type(list_of_dicts) != list and pd.isnull(list_of_dicts):
+        return
     if type(list_of_dicts) != list:
         print("Warning: was looking for {} in {}".format(types, list_of_dicts))
         return(list_of_dicts)
@@ -51,6 +54,6 @@ def extract_sup_orgs(data):
         return data
     else:
         orgs = [get_key_value_for_types(
-            x['Organization_Reference']['ID'], 'Organization_Reference_ID', '_value_1')[12:].replace(
+            x['Organization_Reference']['ID'], ['Organization_Reference_ID'])[12:].replace(
             '_', ' ') for x in data]
         return ' > '.join(orgs)
