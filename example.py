@@ -11,6 +11,7 @@ from datetime import date
 config_hr = 'config-workday-hr-demo.yml'
 config_stu = 'config-workday-stu-demo.yml'
 config_job_hist = 'config-workday-job-history-demo.yml'
+config_acad_appointment_hist = '/Users/cwade/configs/config-workday-appt-history.yml'
 
 min_effdt = date(1900, 1, 1)
 max_to_date = date(2099, 12, 30)
@@ -50,12 +51,13 @@ a = AcademicAppointee(config_hr)
 appointees = a.get_all()
 appointees.to_csv('academic_appointees.csv', index=False)
 
-# Gets a dataframe of all academic appointments. I don't yet know whether this
-# retrieves a person's entire history of appointments or just the current ones.
+# Gets a dataframe of all academic appointments. This returns all appointment history
+# for active and inactive workers. Some of it is a little misleading because fields like
+# race and gender aren't effective dated
 print('Getting academic appointments')
-aa = AcademicAppointment(config_hr)
-appointments = aa.get_all()
-appointments.to_csv('academic_appointments.csv', index=False)
+aa = AcademicAppointment(config_hr, config_acad_appointment_hist)
+aahist = aa.get_academic_appointment_history()
+aahist.to_csv('academic_appointment_history.csv', index=False)
 
 # Gets a dataframe of all job data, including changes over time. The output
 # is pretty clean now, but it needs more testing to verify the data is correct.

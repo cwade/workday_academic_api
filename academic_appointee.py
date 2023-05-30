@@ -17,6 +17,19 @@ class AcademicAppointee(WorkdayAPIObject):
             'Include_Appointment_Data': True}})
         return(r)
 
+    def get_appointees_by_date(self, person_ids, id_types, eff_date):
+        person_ref = []
+        for id, id_type in zip(person_ids, id_types):
+            person_ref.append({'ID': {'_value_1': id, 'type': id_type}})
+
+        other_params = {'Request_References': {'Academic_Appointee_Reference': person_ref},
+                        'Response_Group': {
+                            'Include_Person_Name_Data': True,
+                            'Include_Personal_Information_Data': True,
+                            'Include_Appointment_Data': True}}
+        resp_filters = {'As_Of_Effective_Date': eff_date.strftime('%Y-%m-%d')}
+        return self.api_call(resp_filters, other_params)
+
     def parse_json_to_df(self, json_list):
         ref_list = []
         data_list = []
@@ -31,11 +44,11 @@ class AcademicAppointee(WorkdayAPIObject):
         df = df.rename(columns={0: 'Academic_Appointee_Reference'})
 
 
-        df['id'] = df['Academic_Appointee_Reference'].apply(
+        df['person_id'] = df['Academic_Appointee_Reference'].apply(
             lambda x: get_key_value_for_types(x['ID'],
                                               ['Employee_ID', 'Contingent_Worker_ID', 'Student_ID',
                                                'Academic_Affiliate_ID'], '_value_1'))
-        df['id_type'] = df['Academic_Appointee_Reference'].apply(
+        df['person_id_type'] = df['Academic_Appointee_Reference'].apply(
             lambda x: get_key_value_for_types(x['ID'], ['Employee_ID', 'Contingent_Worker_ID', 'Student_ID',
                                                   'Academic_Affiliate_ID'], 'type'))
         df['gender'] = df['Personal_Information_Data.Gender_Reference.ID'].apply(
@@ -61,6 +74,6 @@ class AcademicAppointee(WorkdayAPIObject):
             'Appointment_Data': 'appointment_data'
         })
 
-        df = df[['id', 'id_type', 'name', 'first_name', 'last_name', 'gender', 'race',
+        df = df[['person_id', 'person_id_type', 'name', 'first_name', 'last_name', 'gender', 'race',
                  'citz_status', 'appointment_data']]
         return df

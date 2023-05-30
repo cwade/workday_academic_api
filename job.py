@@ -1,14 +1,10 @@
 from worker import Worker
-import yaml
-import requests
-import getpass
-from requests.auth import HTTPBasicAuth
-from lxml import etree
 import pandas as pd
 import numpy as np
 from datetime import timedelta, date
 import re
 from json_utils import get_key_value_for_types, extract_sup_orgs
+from xml_utils import get_xml_report
 
 
 class Job:
@@ -84,43 +80,27 @@ class Job:
     def get_job_change_dates(self):
 
         # Fetch the Workday standard report called Job History
-        with open(self.job_history_config_file, 'r') as ymlfile:
-            config = yaml.load(ymlfile, yaml.FullLoader)
-
-        username = config['username']
-        report_url = config['report_url']
-
-        if 'password' in config:
-            password = config['password']
-        else:
-            password = getpass.getpass('Enter password for {}: '.format(username))
-
-        res = requests.get(report_url, auth=HTTPBasicAuth(username, password))
-        xml_data = etree.fromstring(res.content)
+        xml_data = get_xml_report(self.job_history_config_file)
+        ns = {'wd': 'urn:com.workday.report/Job_History'}
 
         data = []
-        report_entries = xml_data.xpath('//wd:Report_Entry', namespaces={'wd': 'urn:com.workday.report/Job_History'})
+        report_entries = xml_data.xpath('//wd:Report_Entry', namespaces=ns)
         for entry in report_entries:
-            name = entry.xpath('./wd:Worker/@wd:Descriptor',
-                               namespaces={'wd': 'urn:com.workday.report/Job_History'})[0]
+            name = entry.xpath('./wd:Worker/@wd:Descriptor', namespaces=ns)[0]
 
             # Handle missing IDs
             worker_id_list = entry.xpath(
-                './wd:Worker/wd:ID[@wd:type="Employee_ID" or @wd:type="Contingent_Worker_ID"]',
-                namespaces={'wd': 'urn:com.workday.report/Job_History'})
+                './wd:Worker/wd:ID[@wd:type="Employee_ID" or @wd:type="Contingent_Worker_ID"]', namespaces=ns)
             worker_id = worker_id_list[0].text
             id_type = worker_id_list[0].get('{urn:com.workday.report/Job_History}type')
 
-            job_histories = entry.xpath('./wd:Job_History', namespaces={'wd': 'urn:com.workday.report/Job_History'})
+            job_histories = entry.xpath('./wd:Job_History', namespaces=ns)
             for job_history in job_histories:
-                pos_descr = job_history.xpath('./wd:Position/@wd:Descriptor',
-                                              namespaces={'wd': 'urn:com.workday.report/Job_History'})[0]
+                pos_descr = job_history.xpath('./wd:Position/@wd:Descriptor', namespaces=ns)[0]
                 pos_id = pos_descr[:pos_descr.find(' ')]
-                process = job_history.xpath('./wd:Process/@wd:Descriptor',
-                                            namespaces={'wd': 'urn:com.workday.report/Job_History'})[0]
+                process = job_history.xpath('./wd:Process/@wd:Descriptor', namespaces=ns)[0]
                 process = process[:process.find(':')]
-                effdt = str(job_history.xpath('./wd:Effective_Date/text()',
-                                              namespaces={'wd': 'urn:com.workday.report/Job_History'})[0])
+                effdt = str(job_history.xpath('./wd:Effective_Date/text()', namespaces=ns)[0])
                 if id_type == 'Employee_ID':
                     data.append((name, worker_id, np.nan, pos_id, pos_descr, effdt, process))
 
